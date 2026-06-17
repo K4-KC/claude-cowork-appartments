@@ -2,6 +2,13 @@
 
 How Cowork should browse and extract from NoBroker. **To be filled in via trial and testing** — record what works, what breaks, and the exact UI steps as you learn them.
 
+## Trial status
+
+- **Status:** First-contact trial in progress. Method to follow: `docs/trial-protocol.md`.
+- **Active trial run:** `data/2026-06-18-trial-nobroker-blr-1bhk/` (brief + findings template + sample CSV).
+- Reference recipes: `docs/sites/housing.md` and `docs/sites/99acres.md` (same filters — note where NoBroker differs, especially login-gating and brokerage).
+- Fill the sections below from the trial's findings; the TBDs are what the trial exists to answer.
+
 ## URL / entry point
 
 - Base search URL: _TBD_
@@ -35,3 +42,11 @@ Cowork captures only the **captured columns** in `docs/data-schema.md` directly 
 
 - Login walls, popups, rate limits, layout quirks: _TBD_
 - NoBroker emphasizes owner (no-broker) listings — note any owner/broker filtering specifics here.
+
+## Findings log
+
+Dated, raw observations from each trial/run — the working notes that get distilled into the sections above. Newest first.
+
+| Date | Observation | Action taken / open question |
+|---|---|---|
+| _2026-06-18_ | _Trial set up; awaiting Cowork's first pass._ | _Run `data/2026-06-18-trial-nobroker-blr-1bhk/` per `docs/trial-protocol.md`._ |
