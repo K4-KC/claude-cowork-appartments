@@ -89,10 +89,11 @@ Decided against for now (add later if a run needs them): **facing direction**, *
 
 ## Derived columns (computed here during post-processing)
 
-These do **not** come from the sites — Claude Code adds them after capture by applying `docs/calculations.md` to the captured columns above. None are committed yet; each is defined once its calculation is. Until then this section stays empty.
+These do **not** come from the sites — Claude Code adds them after capture by applying `docs/calculations.md` to the captured columns above. Each is defined once its calculation is. The first defined column (`calc_price_per_sqft`) is listed below; more are added as calculations are decided in `docs/calculations.md`.
 
 | Column | Type | Unit / format | Derived from |
 |---|---|---|---|
+| `calc_price_per_sqft` | number | ₹/sq.ft/month | `rent ÷ area`, on the captured `area_basis` — see `docs/calculations.md` |
 | `calc_*` | — | — | _Added per calculation once defined in `docs/calculations.md`._ |
 
 Rules for derived columns:
