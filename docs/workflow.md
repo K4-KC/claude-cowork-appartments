@@ -21,7 +21,7 @@ How a single search run flows end to end. This is the contract between Cowork (C
 
 4. **Validate (here).** Load each raw CSV and check it against the schema: required columns present, units consistent, malformed rows flagged. Do not silently "fix" values — flag and ask.
 
-5. **Calculate (here).** Apply the additional logic from `docs/calculations.md` (once defined) to each row, adding the computed columns.
+5. **Calculate (here).** Apply the additional logic from `docs/calculations.md` (once defined) to each row, appending the derived `calc_` columns. This adds derived data alongside the captured columns — it never edits a captured value.
 
 6. **Produce comparison tables.** Output one comparison table per site, kept distinct. Final format/destination is TBD — confirm with the user.
 

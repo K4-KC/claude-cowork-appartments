@@ -26,7 +26,9 @@ Map each filter from `docs/search-config.md` to this site's UI controls:
 
 ## Extraction → CSV
 
-- Which schema columns (`docs/data-schema.md`) this site exposes, and where each lives on the page: _TBD_
+Cowork captures only the **captured columns** in `docs/data-schema.md` directly from the page. The derived `calc_` columns are added later by Claude Code in processing — never produce them here.
+
+- Which captured columns (`docs/data-schema.md`) this site exposes, and where each lives on the page: _TBD_
 - Fields this site does NOT provide: _TBD_
 
 ## Gotchas

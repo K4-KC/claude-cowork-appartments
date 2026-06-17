@@ -11,7 +11,8 @@ Rules and etiquette for capturing and processing listings. They apply to both th
 ## Processing (Claude Code, here)
 
 - This repo never browses the sites. If live data is needed, produce or extend a recipe for Cowork instead.
-- Treat captured CSVs as source of truth: validate and flag, but don't silently rewrite values.
+- Treat captured columns as source of truth: validate and flag, but don't silently rewrite values.
+- Keep captured and derived data separate: write computed values to new `calc_`-prefixed columns (see `docs/data-schema.md`), never back into a captured column.
 - Don't fabricate or interpolate listing data — empty is better than guessed.
 - Keep runs isolated under `data/<run-id>/`; don't overwrite prior runs.
 - Sites are kept distinct — no cross-site merge or dedup unless the user asks.
