@@ -47,7 +47,7 @@ Write down, in one short paragraph, the **fastest reliable path** to a full run 
 - Any throttling, interstitials, or layout variants seen.
 
 ### Phase 5 — Record learnings
-Fold everything above into `docs/sites/<site>.md`: the URL template + filter mapping (Phase 1), the field-coverage map (Phase 2), pagination + open-a-listing notes (Phase 3–4), and gotchas (login walls, popups, quirks). The captured CSV stays in the run folder as evidence.
+Cowork writes its raw findings into the run's **shared handback doc** `data/<run-id>/findings.md` (a template pre-filled with the checklist below) — the agreed Cowork↔Claude Code channel. Claude Code then distills the durable learnings into `docs/sites/<site>.md`: the URL template + filter mapping (Phase 1), the field-coverage map (Phase 2), pagination + open-a-listing notes (Phase 3–4), and gotchas (login walls, popups, quirks). The captured CSV and `findings.md` stay in the run folder as evidence.
 
 ## Findings checklist — every trial must answer these
 

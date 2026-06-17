@@ -26,6 +26,8 @@ A single search "run" flows like this (full detail in `docs/workflow.md`):
 
 Per-site recipes are discovered by **trial and testing** — expect to iterate, and record what works in each site's doc as you learn it.
 
+**Cowork handoff (defacto for trial and real runs).** Cowork runs **inside this repo folder**, so it can read every file directly by repo-relative path. For each run, Claude Code generates a copy-pastable **kickoff message** at `tmp/cowork-kickoff-<run-id>.txt` that points Cowork at the run brief, the relevant docs (`docs/trial-protocol.md` for first-contact trials, plus `docs/data-schema.md` and `docs/rules.md`), the filters, and the output paths. `tmp/` is transient and git-ignored — regenerate the message as needed. Cowork records what it learns into the run's **shared findings doc** `data/<run-id>/findings.md` (the agreed Cowork↔Claude Code channel); Claude Code then distills the durable learnings into `docs/sites/<site>.md` and validates the captured CSV. Full detail in `docs/workflow.md`.
+
 ## Repository layout
 
 - `docs/` — modular documentation, one concern per file (see Documentation map below).

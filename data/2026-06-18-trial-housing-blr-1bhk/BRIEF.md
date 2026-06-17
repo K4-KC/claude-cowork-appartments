@@ -26,6 +26,7 @@
 2. **Field-coverage map** — for each captured column in `docs/data-schema.md`, note card / detail / login / absent.
 3. **Capture 2–3 listings** into `data/2026-06-18-trial-housing-blr-1bhk/housing.csv`. The header row is already there — fill columns in that exact order, leave unavailable cells blank, never invent a value.
 4. **Efficiency verdict** — fastest reliable path, pagination model, main bottleneck, any throttling/quirks.
+5. **Record findings** in `data/2026-06-18-trial-housing-blr-1bhk/findings.md` (templated with the 7 questions).
 
 ## Ground rules
 
@@ -33,4 +34,4 @@ Browse like a careful human. Don't bypass logins, CAPTCHAs, or anti-bot measures
 
 ## What to bring back (the 7-item checklist)
 
-Answer the findings checklist in `docs/trial-protocol.md`: logged-out access + walls, deep-link URL template, per-filter mapping, field-coverage map, pagination model, fastest path + bottleneck, and any format/unit quirks. Claude Code writes these into `docs/sites/housing.md`.
+Record your answers in `data/2026-06-18-trial-housing-blr-1bhk/findings.md` — the shared handback doc, templated with the 7 questions: logged-out access + walls, deep-link URL template, per-filter mapping, field-coverage map, pagination model, fastest path + bottleneck, and any format/unit quirks. Claude Code then distills these into `docs/sites/housing.md`.
