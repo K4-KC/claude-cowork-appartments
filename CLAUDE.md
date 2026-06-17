@@ -42,6 +42,8 @@ Per-site recipes are discovered by **trial and testing** — expect to iterate, 
 
 Committing should be quick and automatic — when work reaches a sensible point, stage and commit it directly (on the current branch) with a clear message, without pausing to ask. Push only when the user asks.
 
+The **`/commit` skill** (`.claude/skills/commit/SKILL.md`) packages this into a one-shot, fully automatic command. It commits **only the files changed during the current conversation session** — never the repo's other pending changes — by staging an explicit, verified list of paths (never `git add -A`/`git add .`/`git commit -a`). It asks nothing and does not push. Use it whenever you want to commit this session's work.
+
 ## Documentation map
 
 | File | Purpose |
