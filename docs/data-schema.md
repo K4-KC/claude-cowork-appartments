@@ -41,14 +41,15 @@ Grouped for readability; in the CSV they appear in this order. Every field is ta
 | `property_type` | string | — | apartment / independent / villa / PG |
 | `bhk` | number | — | 1, 2, 3, … |
 | `bathrooms` | number | — | Count, if listed |
-| `balconies` | number | — | Count, if listed |
 | `area` | number | sq.ft | Note basis in `area_basis` |
 | `area_basis` | string | — | carpet / built-up / super |
 | `floor` | string | — | e.g. "3 of 12" — encodes both the floor and the total floors |
 | `furnishing` | string | — | unfurnished / semi / full |
 | `property_age` | string | — | As listed, e.g. "5 years" or "built 2018" |
 | `parking` | string | — | As listed, e.g. "1 covered car; bike" |
-| `amenities` | string | — | Semicolon-separated list |
+| `amenities` | string | — | Provisional: one semicolon-separated list. Representation is an open decision — see below. |
+
+> **Open decision — amenities representation.** Listings carry many amenities (lift, power backup, gym, pool, security, parking, clubhouse, …), and we have **not yet decided** whether to keep them all in the single `amenities` column above or break them out into one column per amenity (e.g. `amenity_lift`, `amenity_gym`). Until this is settled, capture everything into the single `amenities` column as a semicolon-separated list. Settle it before relying on amenity-level filtering or scoring, and update this doc when decided. See `CLAUDE.md` → Open decisions.
 
 ### Cost
 
@@ -80,7 +81,7 @@ Grouped for readability; in the CSV they appear in this order. Every field is ta
 
 | Column | Type | Unit / format | Notes |
 |---|---|---|---|
-| `notes` | string | — | Free-text for caveats or uncertain/approximate values (see conventions) |
+| `notes` | string | — | **Empty by default.** Free-text, filled only when a row needs a caveat or an uncertain/approximate value flagged (see conventions). |
 
 ### Considered but excluded
 

@@ -34,6 +34,7 @@ Per-site recipes are discovered by **trial and testing** — expect to iterate, 
 ## Data conventions
 
 - Format is **CSV** — one file per site per run. Schema lives in `docs/data-schema.md`.
+- The **captured (direct-from-site) column set is decided** — see `docs/data-schema.md`. Cowork writes those columns; derived `calc_` columns are computed here and remain TBD (`docs/calculations.md`).
 - Runs are isolated under `data/<run-id>/` so search history is kept; do not overwrite a prior run's folder.
 - Sites stay separate; do not merge listings across sites by default.
 - Do not invent or fill in listing values. If Cowork could not capture a field, leave it blank — see the schema doc for the convention. Treat captured data as source-of-truth: validate and flag anything that looks off rather than silently "correcting" it.
@@ -60,6 +61,7 @@ The **`/commit` skill** (`.claude/skills/commit/SKILL.md`) packages this into a 
 These are intentionally unspecified; confirm with the user before relying on them, and update the relevant doc (not just this file) once decided so the knowledge stays modular:
 
 - **Which calculations** to run per listing (true monthly cost, ₹/sq.ft, commute score, weighted ranking, …). Placeholder in `docs/calculations.md`.
+- **Amenities representation** — keep all amenities in one semicolon-separated `amenities` column, or split into one column per amenity. Provisional: single column. Detail in `docs/data-schema.md`.
 - **Exact filter set and target city/localities** for a run. Template in `docs/search-config.md`.
 - **Per-site recipes** — to be built and validated through trial runs.
 - **Final delivery format** of the per-site comparison tables (Markdown, CSV, etc.).
