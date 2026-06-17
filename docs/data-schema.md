@@ -1,6 +1,6 @@
 # CSV data schema
 
-Each run writes one CSV per site at `data/<run-id>/<site>.csv`. The columns below are a **starting proposal** — refine as real captures reveal what each site does and doesn't expose. Keep column names identical across sites so the per-site tables stay comparable.
+Each run writes one CSV per site at `data/<run-id>/<site>.csv`. The captured columns below are the **agreed set** for a run, chosen from what the search is meant to surface (cost, space, location, and condition). Treat them as the target schema: a site that doesn't expose a given field leaves that cell blank (see conventions) rather than dropping the column. Keep column names identical across sites so the per-site tables stay comparable.
 
 ## Two kinds of columns: captured vs derived
 
@@ -13,29 +13,78 @@ To keep the two visually distinct in the CSV, **derived columns are prefixed `ca
 
 ## Captured columns (written directly by Cowork)
 
+Grouped for readability; in the CSV they appear in this order. Every field is taken from the listing as shown, except the bookkeeping fields (`listing_id`, `source_site`, `url`, `captured_at`), which Cowork stamps at capture time.
+
+### Identity & source
+
 | Column | Type | Unit / format | Notes |
 |---|---|---|---|
 | `listing_id` | string | — | Site's own id if available |
+| `source_site` | string | — | housing / 99acres / nobroker / magicbricks |
 | `url` | string | — | Direct link to the listing |
-| `title` | string | — | As shown on the site |
+| `title` | string | — | Listing headline as shown |
+| `captured_at` | datetime | ISO 8601 | When Cowork captured the row |
+
+### Location
+
+| Column | Type | Unit / format | Notes |
+|---|---|---|---|
+| `building_name` | string | — | Society / project / apartment / building name. Basis for Google Maps geocoding in derived data later — capture even when only partial. |
 | `locality` | string | — | Neighborhood / area |
 | `city` | string | — | |
-| `bhk` | number | — | 1, 2, 3, … |
+| `address` | string | — | Street address or nearest landmark, as listed (often approximate); aids the map lookup |
+
+### Property & layout
+
+| Column | Type | Unit / format | Notes |
+|---|---|---|---|
 | `property_type` | string | — | apartment / independent / villa / PG |
+| `bhk` | number | — | 1, 2, 3, … |
+| `bathrooms` | number | — | Count, if listed |
+| `balconies` | number | — | Count, if listed |
+| `area` | number | sq.ft | Note basis in `area_basis` |
+| `area_basis` | string | — | carpet / built-up / super |
+| `floor` | string | — | e.g. "3 of 12" — encodes both the floor and the total floors |
+| `furnishing` | string | — | unfurnished / semi / full |
+| `property_age` | string | — | As listed, e.g. "5 years" or "built 2018" |
+| `parking` | string | — | As listed, e.g. "1 covered car; bike" |
+| `amenities` | string | — | Semicolon-separated list |
+
+### Cost
+
+| Column | Type | Unit / format | Notes |
+|---|---|---|---|
 | `rent` | number | ₹/month | Base monthly rent |
 | `deposit` | number | ₹ | Security deposit |
 | `maintenance` | number | ₹/month | Separate maintenance if listed |
-| `area` | number | sq.ft | Note carpet vs built-up in `area_basis` |
-| `area_basis` | string | — | carpet / built-up / super |
-| `furnishing` | string | — | unfurnished / semi / full |
-| `floor` | string | — | e.g. "3 of 12" |
-| `available_from` | date | YYYY-MM-DD | |
-| `posted_by` | string | — | owner / broker |
-| `amenities` | string | — | Semicolon-separated list |
-| `captured_at` | datetime | ISO 8601 | When Cowork captured the row |
-| `source_site` | string | — | housing / 99acres / nobroker / magicbricks |
+| `maintenance_included` | boolean | true / false | Whether maintenance is already part of rent (blank if unclear) |
+| `brokerage` | number | ₹ | Broker commission / one-time fee (typically 0 for owner listings) |
+| `move_in_charges` | number | ₹ | Other one-time / move-in / society charges, if listed |
 
-> `captured_at` and `source_site` are recorded by Cowork at capture time, so they count as captured columns even though Cowork generates them rather than reading them off the listing.
+### Availability & tenancy
+
+| Column | Type | Unit / format | Notes |
+|---|---|---|---|
+| `available_from` | date | YYYY-MM-DD | Move-in availability |
+| `tenant_preference` | string | — | family / bachelors / company / any |
+| `posted_by` | string | — | owner / broker |
+
+### Contact
+
+| Column | Type | Unit / format | Notes |
+|---|---|---|---|
+| `contact_name` | string | — | Owner's or agent's name, as listed |
+| `contact_phone` | string | — | Phone/contact as listed, only where the site shows it without requiring a login (see `docs/rules.md`). String, to preserve formatting. |
+
+### Notes
+
+| Column | Type | Unit / format | Notes |
+|---|---|---|---|
+| `notes` | string | — | Free-text for caveats or uncertain/approximate values (see conventions) |
+
+### Considered but excluded
+
+Decided against for now (add later if a run needs them): **facing direction**, **photo/image links**, **posted/updated date**, and a **rent-negotiable** flag.
 
 ## Derived columns (computed here during post-processing)
 
