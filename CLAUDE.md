@@ -1,0 +1,63 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## What this repository is
+
+This repo is the **design + processing hub** for an apartment-search workflow over Indian rental sites (housing.com, 99acres.com, nobroker.in, magicbricks.com). It does **not** open or browse those sites. Two different Claudes are involved:
+
+- **Cowork (Claude in the Chrome extension)** — opens the sites, applies filters, surfs listings, and **writes the raw captured data directly into this repo** as CSV under `data/`.
+- **Claude Code (here)** — designs the per-site browsing/extraction recipes Cowork follows, then cleans, validates, and runs calculations on the raw CSVs, producing per-site comparison tables.
+
+Keep this split in mind: when working here you are the *designer and processor*, not the browser. If a task needs live browsing, that belongs to Cowork — write or extend a recipe for it instead of trying to fetch pages yourself.
+
+## Goal
+
+List apartments matching a set of filters across the four sites, run additional logic/calculations on them, and produce a **per-site comparison table** for each site. Sites are kept distinct — cross-site merge/dedup is not required unless the user asks.
+
+## Workflow at a glance
+
+A single search "run" flows like this (full detail in `docs/workflow.md`):
+
+1. Define the run's filters/search parameters — see `docs/search-config.md`.
+2. For each site, hand Cowork the per-site recipe (`docs/sites/<site>.md`) plus the filters; Cowork browses and writes `data/<run-id>/<site>.csv` (raw).
+3. Here in Claude Code, clean/validate the raw CSVs against the schema (`docs/data-schema.md`).
+4. Apply the additional calculations (`docs/calculations.md`) and produce the per-site comparison tables.
+
+Per-site recipes are discovered by **trial and testing** — expect to iterate, and record what works in each site's doc as you learn it.
+
+## Repository layout
+
+- `docs/` — modular documentation, one concern per file (see Documentation map below).
+- `data/<run-id>/<site>.csv` — captured + processed listings. One folder per run, one CSV per site. See `data/README.md`.
+
+## Data conventions
+
+- Format is **CSV** — one file per site per run. Schema lives in `docs/data-schema.md`.
+- Runs are isolated under `data/<run-id>/` so search history is kept; do not overwrite a prior run's folder.
+- Sites stay separate; do not merge listings across sites by default.
+- Do not invent or fill in listing values. If Cowork could not capture a field, leave it blank — see the schema doc for the convention. Treat captured data as source-of-truth: validate and flag anything that looks off rather than silently "correcting" it.
+
+## Committing
+
+Committing should be quick and automatic — when work reaches a sensible point, stage and commit it directly (on the current branch) with a clear message, without pausing to ask. Push only when the user asks.
+
+## Documentation map
+
+| File | Purpose |
+|---|---|
+| `docs/workflow.md` | End-to-end run lifecycle and the Cowork↔repo handoff |
+| `docs/search-config.md` | The filter/search-parameter template for a run (the "set of filters") |
+| `docs/data-schema.md` | CSV columns, units, and raw-vs-clean conventions |
+| `docs/calculations.md` | The additional logic/calculations (TBD — to be decided) |
+| `docs/rules.md` | Operating rules and etiquette for capture + processing |
+| `docs/sites/<site>.md` | Per-site browsing/extraction recipe, refined via trial & testing |
+
+## Open decisions (not yet settled)
+
+These are intentionally unspecified; confirm with the user before relying on them, and update the relevant doc (not just this file) once decided so the knowledge stays modular:
+
+- **Which calculations** to run per listing (true monthly cost, ₹/sq.ft, commute score, weighted ranking, …). Placeholder in `docs/calculations.md`.
+- **Exact filter set and target city/localities** for a run. Template in `docs/search-config.md`.
+- **Per-site recipes** — to be built and validated through trial runs.
+- **Final delivery format** of the per-site comparison tables (Markdown, CSV, etc.).
