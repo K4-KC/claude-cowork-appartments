@@ -1,0 +1,36 @@
+# Trial brief — Housing.com (first-contact trial)
+
+- **Run id:** `2026-06-18-trial-housing-blr-1bhk`
+- **Site:** Housing.com (housing.com)
+- **Type:** Trial (first contact). Goal is the **method**, not the data — discover the fastest reliable way to capture matching listings, then record it. See `docs/trial-protocol.md`.
+- **Driver:** Cowork (Claude in Chrome). Findings come back here for Claude Code to fold into `docs/sites/housing.md`.
+
+## Filters for this trial
+
+| Filter | Value |
+|---|---|
+| City | Bengaluru |
+| Listing type | Rent |
+| BHK | 1 |
+| Budget (₹/month) | 12,000 – 22,000 |
+| Furnishing | Fully furnished |
+| Tenant preference | Bachelors (male & female); "any/all" acceptable if the site can't split it |
+| Localities | None specified — city-wide Bengaluru is fine for the trial |
+
+> Throwaway target — exact matches don't matter. If a filter can't be expressed in Housing.com's UI, note the gap in the recipe and move on; we apply it during processing.
+
+## What to do (follow `docs/trial-protocol.md`)
+
+0. **Access** — can you see listings logged out? Note any modal and whether it dismisses.
+1. **Deep-link probe** — apply the filters once via the UI, then check whether the URL encodes them. If it does, capture the URL template. *(Biggest efficiency win.)*
+2. **Field-coverage map** — for each captured column in `docs/data-schema.md`, note card / detail / login / absent.
+3. **Capture 2–3 listings** into `data/2026-06-18-trial-housing-blr-1bhk/housing.csv`. The header row is already there — fill columns in that exact order, leave unavailable cells blank, never invent a value.
+4. **Efficiency verdict** — fastest reliable path, pagination model, main bottleneck, any throttling/quirks.
+
+## Ground rules
+
+Browse like a careful human. Don't bypass logins, CAPTCHAs, or anti-bot measures; don't hammer pagination. Login-walled fields (often `contact_phone`) are recorded as **gaps**, left blank — not worked around. Record the source URL for every listing.
+
+## What to bring back (the 7-item checklist)
+
+Answer the findings checklist in `docs/trial-protocol.md`: logged-out access + walls, deep-link URL template, per-filter mapping, field-coverage map, pagination model, fastest path + bottleneck, and any format/unit quirks. Claude Code writes these into `docs/sites/housing.md`.

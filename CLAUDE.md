@@ -50,6 +50,7 @@ The **`/commit` skill** (`.claude/skills/commit/SKILL.md`) packages this into a 
 | File | Purpose |
 |---|---|
 | `docs/workflow.md` | End-to-end run lifecycle and the Cowork↔repo handoff |
+| `docs/trial-protocol.md` | First-contact trial method: how to discover a site's fastest capture path and what findings to record |
 | `docs/search-config.md` | The filter/search-parameter template for a run (the "set of filters") |
 | `docs/data-schema.md` | CSV columns, units, and raw-vs-clean conventions |
 | `docs/calculations.md` | The additional logic/calculations (TBD — to be decided) |
