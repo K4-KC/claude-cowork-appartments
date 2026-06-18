@@ -59,5 +59,22 @@ Map captured wording to `apartment / independent / villa / PG` on read (don't re
 - **NoBroker has no city-wide search** — it requires a locality geo-token; browse per-locality (also in `docs/search-config.md`). Mind its default `radius=2.0 km`, which pulls in neighbouring localities (a "Koramangala" search surfaced a BTM Layout listing) — filter by locality if strictness matters.
 - **Deep-linkability differs:** Housing = opaque token URL (reusable); 99acres = filters never reach the URL (re-apply each session); NoBroker = token URL but the locality token is mandatory. Mint token URLs via the UI once and reuse; don't hand-build tokens.
 
+## 10. Amenity normalization (drives `calc_amenity_*` flags)
+`amenities` is captured as one semicolon-separated list of raw site tokens (settled — see `docs/data-schema.md`). The four sites barely share a vocabulary, so amenity-level flags are **derived here** by mapping each site's tokens to a canonical flag. Match case-insensitively and substring-aware; **handle NoBroker's `key: value` form and negations** (`Gated Security: No` → gated = **false**).
+
+Seed map from the trial round (extend as new tokens appear; only materialize flags a run actually filters on):
+
+| Canonical flag | Synonyms / tokens seen (by site) | Notes |
+|---|---|---|
+| `calc_amenity_gated` | "Gated Society" (99acres), "Gated Community" (housing), "Gated Security: Yes/No" (nobroker) | NoBroker form is `key: value` — read the value; `No` → false |
+| `calc_amenity_lift` | "Lift" (housing) | |
+| `calc_amenity_power_backup` | "Power Backup" (housing) | |
+| `calc_amenity_security` | "CCTV" (housing), "Gated Security" (nobroker) | CCTV ≈ surveillance; decide per run whether CCTV alone counts |
+| `calc_amenity_parking` | "Visitor Parking" / "Parking Available" (99acres) | Cross-check the captured `parking` column too |
+| `calc_amenity_piped_gas` | "Piped-gas" (99acres) | |
+| `calc_amenity_water_supply` | "Regular Water Supply" (housing), "Water Supply: Borewell/Both/Corporation" (nobroker) | NoBroker reports the *source*; presence ≠ "regular" |
+
+**Not amenities — do not map** (they ride along in some sites' lists but belong to excluded/other fields): facing direction ("North-East Facing"), location proximity ("Close to Metro/Market/Hospital/School"), property attributes ("Corner Property", "Vaastu Compliant"), flooring ("Vitrified Flooring"). Ignore these when deriving amenity flags.
+
 ## Identity columns (reference, for any future dedup)
 `listing_id` source differs by site: Housing = Property ID in the detail URL; 99acres = the `spid`; NoBroker = the hex id in `…/{id}/detail`. All stable and deep-linkable.

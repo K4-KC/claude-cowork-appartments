@@ -66,7 +66,7 @@ The **`/commit` skill** (`.claude/skills/commit/SKILL.md`) packages this into a 
 These are intentionally unspecified; confirm with the user before relying on them, and update the relevant doc (not just this file) once decided so the knowledge stays modular:
 
 - **Which calculations** to run per listing. **Decided:** `calc_price_per_sqft`, `calc_true_monthly_cost` (+ `calc_cost_basis` flag). **Still open:** commute/distance score and weighted ranking. See `docs/calculations.md`.
-- **Amenities representation** — keep all amenities in one semicolon-separated `amenities` column, or split into one column per amenity. Provisional: single column. Detail in `docs/data-schema.md`.
+- **Amenities & furnishing representation** — **Decided (2026-06-18):** both stay single columns at capture (`furnishing` is one enum; `amenities` is one raw semicolon-separated list, not split per-amenity). Amenity-level filtering/scoring is served by **derived `calc_amenity_*` flags** computed here from a synonym map, only for amenities a run uses. Detail in `docs/data-schema.md`, `docs/calculations.md`, and `docs/processing-rules.md` §10.
 - **Exact filter set and target city/localities** for a run. Template in `docs/search-config.md`.
 - **Per-site recipes** — to be built and validated through trial runs.
 - **Final delivery format** of the per-site comparison tables (Markdown, CSV, etc.).

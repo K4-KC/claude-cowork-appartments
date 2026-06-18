@@ -25,6 +25,17 @@ Effective ₹/month, spreading one-time and refundable amounts over an assumed t
 - **Comparability:** compare `full` rows to `full` rows; a `lower-bound` value is a floor, not the real cost. Per-site cost-field map in `docs/processing-rules.md`.
 - **First applied:** the trial round (`data/2026-06-18-trial-*-blr-1bhk/`).
 
+### `calc_amenity_<name>` (on-demand amenity flags)
+The settled representation for amenities (see `docs/data-schema.md`): capture stays a single raw `amenities` list; amenity-level access is **derived here** as boolean flags, **only for the amenities a run actually filters or scores on** — not one column per possible amenity.
+
+- **Output:** one `calc_amenity_<name>` boolean column per amenity in use, e.g. `calc_amenity_gated`, `calc_amenity_lift`, `calc_amenity_power_backup`, `calc_amenity_security`.
+- **Input:** the captured `amenities` string only (never re-browse the site).
+- **Method:** match the row's `amenities` tokens against the amenity's synonym set in the **amenity-normalization map** (`docs/processing-rules.md` §amenities) — case-insensitive, substring-aware, and handling NoBroker's `key: value` form (e.g. `Gated Security: No` → gated = **false**, not true). `true` when a synonym is present and not negated; `false` when absent or explicitly negated.
+- **`false` ≠ unknown:** `false` means "not mentioned / negated", which is how listings express absence. Leave the cell **blank only when `amenities` itself was uncaptured** for that row.
+- **Don't rewrite capture:** these are appended `calc_` columns; the raw `amenities` cell is untouched.
+- **Scope per run:** decide the small set of amenities that matter for the run before materializing flags; don't auto-expand to every token seen (that recreates the sparse wide table this decision rejected).
+- **Status:** representation **settled (2026-06-18)**; the specific amenity set per run is chosen when a run needs amenity filtering. Not yet applied to any run.
+
 ## Candidate calculations (not yet committed)
 
 From earlier brainstorming — confirm before relying on any:

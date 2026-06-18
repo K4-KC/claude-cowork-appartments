@@ -44,12 +44,15 @@ Grouped for readability; in the CSV they appear in this order. Every field is ta
 | `area` | number | sq.ft | Note basis in `area_basis` |
 | `area_basis` | string | — | carpet / built-up / super |
 | `floor` | string | — | e.g. "3 of 12" — encodes both the floor and the total floors |
-| `furnishing` | string | — | unfurnished / semi / full |
+| `furnishing` | string | — | Single enum: unfurnished / semi / full. **Settled** — one column, not split (it is one categorical value, not a list). See below. |
 | `property_age` | string | — | As listed, e.g. "5 years" or "built 2018" |
 | `parking` | string | — | As listed, e.g. "1 covered car; bike" |
-| `amenities` | string | — | Provisional: one semicolon-separated list. Representation is an open decision — see below. |
+| `amenities` | string | — | One semicolon-separated list of raw tokens as the site shows them. **Settled** — single column at capture; amenity-level access comes from derived `calc_amenity_*` flags. See below. |
 
-> **Open decision — amenities representation.** Listings carry many amenities (lift, power backup, gym, pool, security, parking, clubhouse, …), and we have **not yet decided** whether to keep them all in the single `amenities` column above or break them out into one column per amenity (e.g. `amenity_lift`, `amenity_gym`). Until this is settled, capture everything into the single `amenities` column as a semicolon-separated list. Settle it before relying on amenity-level filtering or scoring, and update this doc when decided. See `CLAUDE.md` → Open decisions.
+> **Settled — amenities & furnishing representation (2026-06-18).** Both stay **single columns at capture**:
+> - **`furnishing`** is one categorical value (unfurnished / semi / full), so there is nothing to split — keep it as one enum column. (If a run ever needs the detailed furnished-items inventory — AC, fridge, bed, … — that is a *new* capture field and would follow the same single-column-then-derive rule as amenities; it is not captured today.)
+> - **`amenities`** stays one semicolon-separated list of the **raw tokens exactly as the site shows them** (source of truth, never rewritten). We do **not** break amenities into one column per amenity at capture time. The trial round showed why: the four sites share almost no amenity vocabulary ("Gated Society" vs "Gated Community" vs "Gated Security: No"), encode differently (NoBroker uses `key: value` pairs), and smuggle non-amenities into the list (facing direction, metro-proximity — both schema-excluded). A per-amenity capture schema would be a sparse, mostly-blank wide table that is *not* comparable across sites, and would force Cowork to normalize while browsing (which violates the captured-vs-derived split).
+> - **Amenity-level filtering/scoring** is served instead by derived **`calc_amenity_*` boolean flags** computed here in Claude Code from a synonym/normalization map — only for the handful of amenities a run actually filters on, not all of them. See the derived-columns section below, `docs/calculations.md`, and the amenity-normalization map in `docs/processing-rules.md`.
 
 ### Cost
 
@@ -96,6 +99,7 @@ These do **not** come from the sites — Claude Code adds them after capture by 
 | `calc_price_per_sqft` | number | ₹/sq.ft/month | `rent ÷ area`, on the captured `area_basis` — see `docs/calculations.md` |
 | `calc_true_monthly_cost` | number | ₹/month | `rent + extra maintenance + (brokerage+move-in)/12 + deposit×0.005` — see `docs/calculations.md` |
 | `calc_cost_basis` | string | full / lower-bound | Confidence flag for `calc_true_monthly_cost`: `lower-bound` when a cost input was absent/uncaptured (value understates true cost) |
+| `calc_amenity_<name>` | boolean | true / false | **On-demand.** One flag per amenity a run filters on (e.g. `calc_amenity_gated`, `calc_amenity_lift`, `calc_amenity_security`), derived from the raw `amenities` list via the synonym map in `docs/processing-rules.md`. Only the amenities in use are materialized — not one column per possible amenity. `false` = absent/not mentioned (not "site doesn't list amenities"); leave blank only when `amenities` itself was uncaptured. |
 | `calc_*` | — | — | _Added per calculation once defined in `docs/calculations.md`._ |
 
 Rules for derived columns:
