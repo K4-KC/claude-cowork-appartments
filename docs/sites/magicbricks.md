@@ -4,43 +4,43 @@ How Cowork should browse and extract from Magicbricks. **To be filled in via tri
 
 ## Trial status
 
-- **Status:** First-contact trial in progress. Method to follow: `docs/trial-protocol.md`.
-- **Active trial run:** `data/2026-06-18-trial-magicbricks-blr-1bhk/` (brief + findings template + sample CSV).
-- Reference recipes: `docs/sites/housing.md`, `docs/sites/99acres.md`, `docs/sites/nobroker.md` (same filters — note where Magicbricks differs, especially login modals, deep-linkability, and cost-field coverage).
-- Fill the sections below from the trial's findings; the TBDs are what the trial exists to answer.
+- **Status:** ⛔ **BLOCKED → DROPPED from the trial round** (user decision, 2026-06-18). The first-contact trial could not be performed — see Blocker below. Raw record: `data/2026-06-18-trial-magicbricks-blr-1bhk/findings.md`.
+- The trial round closed with the 3 reachable sites (`docs/sites/housing.md`, `docs/sites/99acres.md`, `docs/sites/nobroker.md`). 
+- Recipe sections below are **unfilled** — nothing was observed; do **not** infer Magicbricks' behaviour from the other three sites.
+
+## Blocker — site not reachable from Cowork
+
+`magicbricks.com` is refused by a **browser-level safety restriction** in Cowork (Claude in Chrome), not by the site:
+
+- Navigation error: **"This site is not allowed due to safety restrictions."** It fires before any page loads, on every `magicbricks.com` URL tried (www, bare, and rent SRP paths).
+- It is **not** a network error, login wall, CAPTCHA, or anti-bot measure. The same browser ran housing.com / 99acres.com / nobroker.in successfully the same day, so the block is **domain-specific**.
+- Matches **Claude in Chrome's default (server-side) site blocklist** (documented categories incl. banking/financial-services, trading, adult, crypto, piracy — per Anthropic support). Magicbricks is a property portal; **[Inference]** likely an over-broad / false-positive match (possibly via its home-loan marketing). Unconfirmed.
+- Per `docs/rules.md`, the block was **not** worked around (no curl/python fetch, no archive mirror, no driving the browser around the restriction).
+- **No documented self-serve un-block:** per-site extension permissions don't override the default blocklist; Team/Enterprise admin allowlists are framed as *additional* restrictions, not overrides **[Unverified]**. Sanctioned route: report the misclassification to Anthropic (in-chat feedback) and request reclassification — not instant, not user-controlled.
+
+## Revisit condition
+
+Re-run the standard first-contact trial (`docs/trial-protocol.md`) **only if** the domain block is later lifted (e.g. after a reclassification report). Until then the sections below stay unfilled.
 
 ## URL / entry point
 
-- Base search URL: _TBD_
-- Does it support filters in the URL (deep-linkable searches)? _TBD_
+- _Not observed — site blocked._
 
 ## Applying the run's filters
 
-Map each filter from `docs/search-config.md` to this site's UI controls:
-
-| Filter | How to set on this site | Notes |
-|---|---|---|
-| City | _TBD_ | |
-| Locality | _TBD_ | |
-| Budget | _TBD_ | |
-| BHK | _TBD_ | |
-| … | _TBD_ | |
+- _Not observed — site blocked._
 
 ## Walking results
 
-- Pagination / infinite scroll behavior: _TBD_
-- How to open a listing for full details: _TBD_
+- _Not observed — site blocked._
 
 ## Extraction → CSV
 
-Cowork captures only the **captured columns** in `docs/data-schema.md` directly from the page. The derived `calc_` columns are added later by Claude Code in processing — never produce them here.
-
-- Which captured columns (`docs/data-schema.md`) this site exposes, and where each lives on the page: _TBD_
-- Fields this site does NOT provide: _TBD_
+- _Not observed — site blocked._ `magicbricks.csv` holds only its header row (0 listings; nothing fabricated).
 
 ## Gotchas
 
-- Login walls, popups, rate limits, layout quirks: _TBD_
+- **The blocker itself is the headline gotcha** — the site is unreachable from Cowork under the current safety blocklist (see Blocker above).
 
 ## Findings log
 
@@ -48,4 +48,4 @@ Dated, raw observations from each trial/run — the working notes that get disti
 
 | Date | Observation | Action taken / open question |
 |---|---|---|
-| _2026-06-18_ | _Trial set up; awaiting Cowork's first pass._ | _Run `data/2026-06-18-trial-magicbricks-blr-1bhk/` per `docs/trial-protocol.md`._ |
+| 2026-06-18 | Trial could not run — `magicbricks.com` refused by Cowork's browser safety blocklist ("site not allowed due to safety restrictions"); domain-specific, not the site. | **Dropped from the round** (user decision). Revisit only if the block is lifted; optionally report the misclassification to Anthropic for reclassification. |

@@ -86,3 +86,11 @@ Not observed — site blocked.
 
 ## Sample captured
 0 listings written to `magicbricks.csv` (header row only). No rows fabricated — the site could not be reached.
+
+---
+
+## Claude Code: processing pass (2026-06-18)
+
+**No capture to validate.** `magicbricks.csv` is header-only (0 rows); nothing fabricated — the correct outcome for an unreachable site. No `calc_` columns added (no data).
+
+**Blocker accepted; Magicbricks dropped from the round** (user decision). Distilled into `docs/sites/magicbricks.md` (Status + Blocker + Revisit condition). **The trial round is complete with 3 of 4 sites** — Housing.com, 99acres, NoBroker. Magicbricks re-enters only if the Cowork domain block is lifted (e.g. after a reclassification report to Anthropic).
