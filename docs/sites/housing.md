@@ -1,6 +1,8 @@
 # Recipe: Housing.com (housing.com)
 
-How Cowork should browse and extract from Housing.com. **To be filled in via trial and testing** — record what works, what breaks, and the exact UI steps as you learn them.
+> **Cowork — start here.** This recipe is self-contained: to run Housing.com you need only this file. First read **`docs/cowork-run.md`** (the standing run procedure), then follow the site-specific steps below. **Read order:** `docs/cowork-run.md` → this file → `docs/data-schema.md` → `docs/rules.md`. A normal run needs **no kickoff message** — kickoffs are only for first-contact trials of a not-yet-reciped site (`docs/trial-protocol.md`).
+
+The durable run recipe for Housing.com, distilled from the first-contact trial. If the live site has drifted from what's below, capture the difference in the run's `findings.md` so this recipe can be refreshed.
 
 ## Trial status
 

@@ -9,6 +9,8 @@ Run one site at a time. A trial is "done" when its site recipe is filled in well
 - **Cowork (Chrome)** runs the phases below — it opens the site, applies filters, browses, and captures a few listings into the run CSV.
 - **Claude Code (here)** authored this protocol and the run brief, and afterwards folds Cowork's findings into the site recipe and validates the captured CSV against `docs/data-schema.md`.
 
+> **A trial is the one path that uses a kickoff message.** Because the site has no recipe yet, Claude Code generates `tmp/cowork-kickoff-<run-id>.txt` to hand Cowork this protocol + the filters. The trial's whole purpose is to retire that need: once the resulting `docs/sites/<site>.md` is complete, normal runs of the site are kickoff-free and self-served via `docs/cowork-run.md`.
+
 ## Ground rules (from `docs/rules.md`)
 
 - Browse like a careful human. Don't bypass logins, paywalls, CAPTCHAs, or anti-bot measures, and don't hammer pagination.

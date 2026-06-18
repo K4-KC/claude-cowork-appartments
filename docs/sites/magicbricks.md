@@ -1,6 +1,8 @@
 # Recipe: Magicbricks (magicbricks.com)
 
-How Cowork should browse and extract from Magicbricks. **To be filled in via trial and testing** — record what works, what breaks, and the exact UI steps as you learn them.
+> **Cowork — do not run (blocked).** Magicbricks is currently **unreachable from Cowork** (a browser-level safety block — see Blocker below), so there is no run recipe to follow and no kickoff to issue. **Skip this site in runs** until the block is lifted. If the block is ever lifted and you reach the site, switch to a first-contact trial (`docs/trial-protocol.md`) and record what you see in the run's `findings.md`.
+
+This file is a placeholder recipe: nothing was observed, so the run sections stay unfilled — do **not** infer Magicbricks' behaviour from the other three sites.
 
 ## Trial status
 

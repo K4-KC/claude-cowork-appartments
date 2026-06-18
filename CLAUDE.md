@@ -26,7 +26,7 @@ A single search "run" flows like this (full detail in `docs/workflow.md`):
 
 Per-site recipes are discovered by **trial and testing** — expect to iterate, and record what works in each site's doc as you learn it.
 
-**Cowork handoff (defacto for trial and real runs).** Cowork runs **inside this repo folder**, so it can read every file directly by repo-relative path. For each run, Claude Code generates a copy-pastable **kickoff message** at `tmp/cowork-kickoff-<run-id>.txt` that points Cowork at the run brief, the relevant docs (`docs/trial-protocol.md` for first-contact trials, plus `docs/data-schema.md` and `docs/rules.md`), the filters, and the output paths. `tmp/` is transient and git-ignored — regenerate the message as needed. Cowork records what it learns into the run's **shared findings doc** `data/<run-id>/findings.md` (the agreed Cowork↔Claude Code channel); Claude Code then distills the durable learnings into `docs/sites/<site>.md` and validates the captured CSV. Full detail in `docs/workflow.md`.
+**Cowork handoff.** Cowork runs **inside this repo folder**, so it reads every file directly by repo-relative path. **Normal runs are kickoff-free:** point Cowork at the site recipe `docs/sites/<site>.md` (its "Cowork — start here" header auto-loads `docs/cowork-run.md` → `docs/data-schema.md` → `docs/rules.md`) plus the run id + filters, and it captures `data/<run-id>/<site>.csv`. **Only first-contact trials use a kickoff:** when a site has no recipe yet, Claude Code generates a copy-pastable **kickoff message** at `tmp/cowork-kickoff-<run-id>.txt` (transient, git-ignored) pointing Cowork at `docs/trial-protocol.md` + the filters; the recipe the trial produces is what makes future runs of that site kickoff-free. Either way, Cowork records what it learns into the run's **shared findings doc** `data/<run-id>/findings.md` (the agreed Cowork↔Claude Code channel); Claude Code distills the durable learnings into `docs/sites/<site>.md` and validates the captured CSV. Full detail in `docs/workflow.md` and `docs/cowork-run.md`.
 
 ## Repository layout
 
@@ -52,13 +52,14 @@ The **`/commit` skill** (`.claude/skills/commit/SKILL.md`) packages this into a 
 | File | Purpose |
 |---|---|
 | `docs/workflow.md` | End-to-end run lifecycle and the Cowork↔repo handoff |
-| `docs/trial-protocol.md` | First-contact trial method: how to discover a site's fastest capture path and what findings to record |
+| `docs/cowork-run.md` | Cowork's standing instructions for a **normal run** — the auto-load read order and capture steps; no kickoff needed |
+| `docs/trial-protocol.md` | First-contact trial method (design-time, uses a kickoff): how to discover a site's fastest capture path and what findings to record |
 | `docs/search-config.md` | The filter/search-parameter template for a run (the "set of filters") |
 | `docs/data-schema.md` | CSV columns, units, and raw-vs-clean conventions |
 | `docs/calculations.md` | The additional logic/calculations (`price_per_sqft` + `true_monthly_cost` defined; commute/ranking open) |
 | `docs/processing-rules.md` | Cross-site validation/normalization rules the trials surfaced (area-basis, per-site cost-field map, date/token handling) |
 | `docs/rules.md` | Operating rules and etiquette for capture + processing |
-| `docs/sites/<site>.md` | Per-site browsing/extraction recipe, refined via trial & testing |
+| `docs/sites/<site>.md` | Per-site browsing/extraction recipe — the self-contained run entry point (has a "Cowork — start here" header), refined via trial & testing |
 
 ## Open decisions (not yet settled)
 
