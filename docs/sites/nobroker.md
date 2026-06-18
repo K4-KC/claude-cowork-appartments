@@ -49,6 +49,19 @@ All filters expressible in the UI and encodable in the URL.
 - **Infinite scroll** (filter call carries `pageNo`, increments on scroll); no numbered pages or "Load more" seen. Header carries a total count. [Unverified] exact batch size — the in-budget trial set was tiny. "Similar Properties" carousels on detail pages (skip when harvesting).
 - **Most schema fields are on the card.** Open each listing's `…/{id}/detail` page only for the ~5 detail-only fields.
 
+### Fastest reliable capture — the results JSON API (added 2026-06-18 run; supersedes DOM/card scraping)
+
+The HTML results list is **unreliable to scrape**: it lazy-renders only ~4 cards, injects non-listing interstitials ("Top Societies in your Search") and a "Premium Properties" promo carousel, and the header count can exceed the rendered cards. **Use the underlying results API instead** — and it returns the "detail-only" fields too, so **per-listing detail-page opens are not needed.**
+
+- Endpoint: `GET https://www.nobroker.in/api/v3/multi/property/RENT/filter` + the results page's own query string (`searchParam` token + filters) + `&pageNo=N`. Call it same-origin from the results page: `fetch(url,{credentials:'include',headers:{accept:'application/json'}})`. Returns `{status:"success", message:"N Rental Homes", data:[…]}`; loop `pageNo=1..` until a short/empty page.
+- Each property object carries: `id`, `propertyCode`, `propertyTitle`, `locality`, `city`, `address`/`completeStreetName`, `buildingType` (AP/IH/IF/VL/GC), `type` (BHK), `bathroom`, `propertySize`, `floor`+`totalFloor`, `furnishingDesc`, `propertyAge`, `parkingDesc`, `rent`, `deposit`, `maintenanceAmount`, `leaseType`/`leaseTypeNew`, `availableFrom` (ms epoch), `waterSupply`, `amenitiesMap`, `detailUrl`. [Verified vs 2 detail pages, 2026-06-18.]
+- **Field traps (verified):**
+  - **`maintenanceIncluded` is inverted/unreliable** — use **`maintenanceAmount`**: >0 ⇒ extra (`maintenance_included=false`); absent/0 ⇒ included (true). Matches the on-page "+ ₹N" vs "No Extra Maintenance".
+  - **Amenities:** use **`amenitiesMap`** (per-listing code→bool; matches the page's "Amenities" section). The top-level `amenities` **array (~234 items) is the global catalog — do NOT use it**, and top-level `gym`/`pool`/`lift` booleans are unreliable.
+  - **`propertyAge` is a bucket code:** 0→"Newly Constructed", 5→"5-10 Years" [verified]; 1→"1-3 Years", 3→"3-5 Years", 10→"10+ Years" [inferred from NoBroker's standard buckets].
+  - **Gender preference IS exposed** (contra the trial's "tenant usually Anyone"): `leaseType`/`leaseTypeNew` give real eligibility — `ANYONE`, `BACHELOR` (=both genders), `BACHELOR_MALE`, `BACHELOR_FEMALE`, `FAMILY`, `COMPANY`, and **combinations** (e.g. `FAMILY+BACHELOR_FEMALE` = women bachelors only). Apply any men-AND-women rule on this, not by inference.
+- Tooling note: the Chrome JS-eval tool truncates output ~1 KB and blocks echoed query strings; transfer API rows out by rendering the JSON into the DOM and reading via `get_page_text`.
+
 ## Extraction → CSV
 
 Cowork captures only the **captured columns** in `docs/data-schema.md` directly from the page. The derived `calc_` columns are added later by Claude Code in processing — never produce them here.
@@ -80,3 +93,4 @@ Dated, raw observations from each trial/run — the working notes that get disti
 | Date | Observation | Action taken / open question |
 |---|---|---|
 | 2026-06-18 | First-contact trial complete: **no city-wide search** (needs locality geo-token; silent skeletons otherwise); deep-linkable with the token; full logged-out browsing except owner contact (phone+OTP); brokerage 0; `posted_by` inferred; near-complete cost set (rent+deposit+maint+brokerage). 3 listings captured + validated; `calc_price_per_sqft` (built-up) added. | Recipe filled. Open: scroll batch size [Unverified]; whether gated-society listings expose a richer amenities list; per-locality run scope noted in `docs/search-config.md`. |
+| 2026-06-18 | **Normal run** (`2026-06-18-nobroker-blr-1bhk-furnished-bachelors`, 8 localities, 50 listings). Discovered the **results JSON API** (`/api/v3/multi/property/RENT/filter`) returns all schema fields incl. the detail-only ones (bathroom/floor/age/parking/amenitiesMap) → **detail-page opens unnecessary**. HTML list is unreliable (lazy-render + interstitials). `maintenanceIncluded` flag inverted (use `maintenanceAmount`); `amenities` array is the global catalog (use `amenitiesMap`); `propertyAge` is a bucket code; **gender preference IS exposed** via `leaseType`/`leaseTypeNew`. Bellandur & Indiranagar returned 0 for the filter. | Recipe updated (new "Fast capture via results API" section). Resolves the trial's "tenant usually Anyone" caveat for gender filtering. Open: amenity code→name map has a few [Unverified] labels (SC, CPA). |
