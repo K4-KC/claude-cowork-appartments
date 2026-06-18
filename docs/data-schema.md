@@ -38,7 +38,7 @@ Grouped for readability; in the CSV they appear in this order. Every field is ta
 
 | Column | Type | Unit / format | Notes |
 |---|---|---|---|
-| `property_type` | string | — | apartment / independent / villa / PG |
+| `property_type` | string | — | Captured raw; normalized on read to the enum apartment / independent / villa / PG / studio (see `docs/processing-rules.md` §6) |
 | `bhk` | number | — | 1, 2, 3, … |
 | `bathrooms` | number | — | Count, if listed |
 | `area` | number | sq.ft | Note basis in `area_basis` |
@@ -69,7 +69,7 @@ Grouped for readability; in the CSV they appear in this order. Every field is ta
 
 | Column | Type | Unit / format | Notes |
 |---|---|---|---|
-| `available_from` | date | YYYY-MM-DD | Move-in availability |
+| `available_from` | date | YYYY-MM-DD | Move-in availability. Captured as shown: an ISO date when the site gives one, otherwise a raw availability token ("Immediate" / "Available now" / "Immediately"). Normalized in processing — see `docs/processing-rules.md` §3. |
 | `tenant_preference` | string | — | family / bachelors / company / any |
 | `posted_by` | string | — | owner / broker |
 
@@ -92,13 +92,13 @@ Decided against for now (add later if a run needs them): **facing direction**, *
 
 ## Derived columns (computed here during post-processing)
 
-These do **not** come from the sites — Claude Code adds them after capture by applying `docs/calculations.md` to the captured columns above. Each is defined once its calculation is. The first defined column (`calc_price_per_sqft`) is listed below; more are added as calculations are decided in `docs/calculations.md`.
+These do **not** come from the sites — Claude Code adds them after capture by applying `docs/calculations.md` to the captured columns above. Each is defined once its calculation is. The columns defined so far — `calc_price_per_sqft`, `calc_true_monthly_cost` (with its `calc_cost_basis` flag), and the on-demand `calc_amenity_*` flags — are listed below; more are added as calculations are decided in `docs/calculations.md`.
 
 | Column | Type | Unit / format | Derived from |
 |---|---|---|---|
 | `calc_price_per_sqft` | number | ₹/sq.ft/month | `rent ÷ area`, on the captured `area_basis` — see `docs/calculations.md` |
 | `calc_true_monthly_cost` | number | ₹/month | `rent + extra maintenance + (brokerage+move-in)/12 + deposit×0.005` — see `docs/calculations.md` |
-| `calc_cost_basis` | string | full / lower-bound | Confidence flag for `calc_true_monthly_cost`: `lower-bound` when a cost input was absent/uncaptured (value understates true cost) |
+| `calc_cost_basis` | string | full / lower-bound | Confidence flag for `calc_true_monthly_cost`: `full` when every additive cost (`maintenance`, `brokerage`, `move_in_charges`) is captured or confirmed ₹0; `lower-bound` when ≥1 is unknown (site/listing never exposed it) so the value understates true cost — judged on real-world completeness, not on what a site exposes. See `docs/calculations.md`. |
 | `calc_amenity_<name>` | boolean | true / false | **On-demand.** One flag per amenity a run filters on (e.g. `calc_amenity_gated`, `calc_amenity_lift`, `calc_amenity_security`), derived from the raw `amenities` list via the synonym map in `docs/processing-rules.md`. Only the amenities in use are materialized — not one column per possible amenity. `false` = absent/not mentioned (not "site doesn't list amenities"); leave blank only when `amenities` itself was uncaptured. |
 | `calc_*` | — | — | _Added per calculation once defined in `docs/calculations.md`._ |
 

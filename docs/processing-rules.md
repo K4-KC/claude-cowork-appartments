@@ -23,11 +23,14 @@ Absence of a cost field ≠ ₹0. What each site actually exposes:
 | `brokerage` | ✅ (popover) | ✗ | ✅ = **0** (owner platform) |
 | `move_in_charges` | ✅ (popover; "Painting") | ✗ | ✗ |
 
-So set `calc_cost_basis = full` only when every cost field the **site** exposes was captured; otherwise `lower-bound`. On 99acres, true cost is essentially `rent (+ deposit opportunity)` — a floor. On Housing, **open the price-breakup popover** or you'll miss maintenance/brokerage/move-in and drop to `lower-bound`.
+So set `calc_cost_basis = full` only when every **additive** cost (`maintenance`, `brokerage`, `move_in_charges`) was captured **or confirmed ₹0**; otherwise `lower-bound` (judged on real-world completeness, **not** on what a site happens to expose — see `docs/calculations.md`). Concretely, across the trial sites:
+- **99acres** → `lower-bound`: it never shows maintenance/brokerage/move-in, so the figure (`rent` + deposit opportunity) is a floor.
+- **NoBroker** → `lower-bound`: brokerage is a confirmed 0 and maintenance is shown, but **`move_in_charges` is never exposed**, so one additive cost stays unknown.
+- **Housing** → **open the price-breakup popover** to capture maintenance/brokerage/move-in; a row is `full` only when all three are captured, else `lower-bound`.
 
 ## 3. `available_from` — token vs date, and poster errors
 Captured as shown; values are mixed:
-- Tokens: "Available now" (Housing), "Immediate"/"Ready to move" (99acres), "Immediately"/"Ready to Move" (NoBroker) → normalize to an `immediate` sentinel (or the capture date) in processing.
+- Tokens: "Available now" (Housing), "Immediate"/"Ready to move" (99acres), "Immediately"/"Ready to Move" (NoBroker) → normalize to an `immediate` sentinel (or the capture date) **on read** when filtering/computing — don't rewrite the captured cell.
 - Dates: NoBroker "Possession: Jul 1, 2026" → `2026-07-01`.
 - **Poster errors happen:** a 99acres listing showed `2030-11-30` while also saying "Ready to move". Treat far-future / self-contradictory dates skeptically; don't feed them blindly into availability or commute logic.
 
@@ -40,14 +43,15 @@ Sites list which tenant types are permitted, variously joined:
 Filter/score on **membership** ("is bachelor allowed?"), never equality. A bachelor search does not imply the listing prints "Bachelor".
 
 ## 5. `posted_by` reliability varies
+- **Normalize on read** (don't rewrite the captured cell; case-insensitive) to the schema enum `owner / broker`: 99acres `Dealer` → broker, `Owner` → owner; Housing agency name → broker, `Owner` → owner.
 - Housing.com / 99acres: **printed** (owner/broker, owner/dealer) — trust it.
 - NoBroker: **inferred** — no per-listing owner/broker label logged out; "owner" is the platform default (`brokerage = 0`). Treat NoBroker `posted_by=owner` as `[Inference]`, not observed.
 
 ## 6. `property_type` — normalize variants to the enum
-Map captured wording to `apartment / independent / villa / PG` on read (don't rewrite the captured cell):
+Map captured wording to `apartment / independent / villa / PG / studio` on read (don't rewrite the captured cell):
 - "Flat", "Apartment" → apartment
 - "Independent Builder Floor", "Builder Floor", "independent floor" → independent
-- "Studio Apartment (1 RK)" → studio / 1 RK (⚠ also a BHK-ambiguity flag — see §7)
+- "Studio Apartment (1 RK)" → studio (⚠ also a BHK-ambiguity flag — see §7)
 
 ## 7. BHK ambiguity (99acres)
 99acres bundles **1 RK and 1 BHK** under one filter button, so studios appear in "1 BHK" results with `bhk=1`. If a run needs *true* 1 BHK, exclude studios in processing (flagged in `notes`/title). Housing and NoBroker keep 1 RK separate.

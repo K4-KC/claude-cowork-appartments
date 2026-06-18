@@ -36,7 +36,7 @@ Per-site recipes are discovered by **trial and testing** — expect to iterate, 
 ## Data conventions
 
 - Format is **CSV** — one file per site per run. Schema lives in `docs/data-schema.md`.
-- The **captured (direct-from-site) column set is decided** — see `docs/data-schema.md`. Cowork writes those columns; derived `calc_` columns are computed here and remain TBD (`docs/calculations.md`).
+- The **captured (direct-from-site) column set is decided** — see `docs/data-schema.md`. Cowork writes those columns; derived `calc_` columns are computed here — `calc_price_per_sqft` and `calc_true_monthly_cost` (+ `calc_cost_basis`) are defined, with commute/ranking still open (`docs/calculations.md`).
 - Runs are isolated under `data/<run-id>/` so search history is kept; do not overwrite a prior run's folder.
 - Sites stay separate; do not merge listings across sites by default.
 - Do not invent or fill in listing values. If Cowork could not capture a field, leave it blank — see the schema doc for the convention. Treat captured data as source-of-truth: validate and flag anything that looks off rather than silently "correcting" it.

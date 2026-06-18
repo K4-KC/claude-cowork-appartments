@@ -139,7 +139,8 @@ All three sample listings happened to be **broker**-posted (brokerage > 0, "Hous
 - **Sample is 100% broker-posted** — owner `brokerage`/contact pattern unconfirmed; verify in a real run.
 
 ### Calculation applied
-- **`calc_price_per_sqft`** = `rent ÷ area`, on the captured `area_basis` (built-up for all 3), ₹/sq.ft/month, 2 dp. Defined in `docs/calculations.md`; appended after the captured columns per `docs/data-schema.md`. This is the one assumption-free metric; the richer calcs below are deferred pending decisions.
+- **`calc_price_per_sqft`** = `rent ÷ area`, on the captured `area_basis` (built-up for all 3), ₹/sq.ft/month, 2 dp. Defined in `docs/calculations.md`; appended after the captured columns per `docs/data-schema.md`.
+- **`calc_true_monthly_cost`** (+ **`calc_cost_basis`**) — later applied per `docs/calculations.md` (`rent + extra maintenance + (brokerage + move-in)/12 + deposit×0.005`). Row 20227168 = `full` (price-breakup popover opened, all cost fields captured); 20422355 and 19757273 = `lower-bound` (`move_in_charges` not captured).
 
 ### Per-site comparison table (trial demo — Housing.com, sorted by ₹/sq.ft ascending)
 | listing_id | locality | type | area (built-up) | rent | deposit | maint | brokerage | ₹/sq.ft | posted_by |
@@ -151,4 +152,4 @@ All three sample listings happened to be **broker**-posted (brokerage > 0, "Hous
 Akshayanagar is the best value per built-up sq.ft; Whitefield the priciest. (Caveat: only 3 rows, all brokers — illustrative, not a real ranking.)
 
 ### Calculations still open (need a decision before I commit them)
-`calc_true_monthly_cost` (needs a stay-duration / amortization window and how to treat the *refundable* deposit), a commute/distance score (needs target locations), and any weighted ranking — all listed as undecided in `docs/calculations.md`. Flagging, not assuming.
+`calc_true_monthly_cost` is now **defined and applied** (STAY_MONTHS = 12; the *refundable* deposit charged at 0.5%/mo opportunity cost — `docs/calculations.md`). Still open: a commute/distance score (needs target locations) and any weighted ranking — both listed as undecided in `docs/calculations.md`. Flagging, not assuming.

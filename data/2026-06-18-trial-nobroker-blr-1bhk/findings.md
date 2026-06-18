@@ -153,6 +153,7 @@ Detail-only extras NOT in schema (ignored or excluded): Facing, Water Supply, Pe
 
 ### Calculation applied
 - **`calc_price_per_sqft`** = `rent ÷ area` on the captured `area_basis` (built-up for all 3), ₹/sq.ft/month, 2 dp. Per `docs/calculations.md`.
+- **`calc_true_monthly_cost`** (+ **`calc_cost_basis`**) — applied per `docs/calculations.md`. All three rows = `lower-bound`: brokerage is a confirmed 0 and maintenance is captured, but `move_in_charges` is never exposed on NoBroker, so one additive cost stays unknown (real-world-completeness rule — `docs/calculations.md`). _(Updated 2026-06-18 from an earlier `full` flag that used the looser "what the site exposes" reading.)_
 
 ### Per-site comparison table (trial demo — NoBroker, sorted by ₹/sq.ft ascending)
 | listing_id | locality | area (built-up) | rent | deposit | maint | brokerage | ₹/sq.ft | posted_by |

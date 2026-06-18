@@ -134,6 +134,7 @@ Open the base city/rent URL → dismiss the scam interstitial once → apply the
 
 ### Calculation applied
 - **`calc_price_per_sqft`** = `rent ÷ area` on the captured `area_basis` (carpet for all 3), ₹/sq.ft/month, 2 dp. Per `docs/calculations.md`.
+- **`calc_true_monthly_cost`** (+ **`calc_cost_basis`**) — applied per `docs/calculations.md`. All three rows = `lower-bound`: 99acres never exposes maintenance/brokerage/move-in, so the figure (`rent` + deposit opportunity) is a floor, not the real cost.
 
 ### Per-site comparison table (trial demo — 99acres, sorted by ₹/sq.ft ascending)
 | listing_id | locality | type | area (carpet) | rent | deposit | maint | posted_by | ₹/sq.ft |

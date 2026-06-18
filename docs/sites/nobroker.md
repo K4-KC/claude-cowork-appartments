@@ -56,7 +56,7 @@ Cowork captures only the **captured columns** in `docs/data-schema.md` directly 
 **Field-coverage map** (`card` = results card · `detail` = detail page only · `login` = login/OTP-walled gap · `absent`):
 
 - **On the card:** `title`, `locality`, `city`, `address`, `rent`, `deposit`, `maintenance` + `maintenance_included` ("+ ₹N" = extra/false; "Included"/"No Extra Maintenance" = true), `area` + `area_basis` (labelled "Builtup" → built-up), `furnishing`, `bhk`, `property_type`, `tenant_preference`, `available_from` ("Possession"), `url`, `listing_id` (hex id in the detail URL).
-- **Detail page only:** `bathrooms`, `floor` ("3/4" = floor/total), `property_age` (range bucket "1-3 Years"/"Newly Constructed"), `parking` ("Bike"), `building_name` (only when a named society; blank for "standalone building").
+- **Detail page only:** `bathrooms`, `floor` (site shows "Floor: 3/4"; record in the schema's "X of Y" form, e.g. "3 of 4" — see `docs/data-schema.md`), `property_age` (range bucket "1-3 Years"/"Newly Constructed"), `parking` ("Bike"), `building_name` (only when a named society; blank for "standalone building").
 - **Login-walled (gap, leave blank):** `contact_name`, `contact_phone` — behind the "Get Owner Details" phone+OTP modal.
 - **Mostly absent:** `amenities` — no dedicated amenities list for standalone/small buildings; only Overview attributes (Water Supply, Gated Security) — capture those. [Unverified] for gated societies. `move_in_charges` — not shown.
 - **`brokerage`:** record **0** (platform-wide "Without Brokerage").

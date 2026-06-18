@@ -14,7 +14,7 @@ The durable run recipe for Housing.com, distilled from the first-contact trial. 
 - **Base search URL** (Bengaluru rent flats, no filters): `https://housing.com/rent/flats-for-rent-in-bangalore-karnataka-P38f9yfbk7p3m2h1f` — `P38f9yfbk7p3m2h1f` is the base search id for "Bengaluru rent flats".
 - **Deep-linkable? Yes** (reloading a fully-filtered URL in a fresh tab reproduced the exact result set — verified). **But the encoding is an opaque token scheme in the URL path**, not human-readable `?key=value` query params:
   - A single filter yields a readable slug, e.g. 1 BHK only → `https://housing.com/rent/1bhk-flats-for-rent-in-bangalore-karnataka-C2P38f9yfbk7p3m2h1f`.
-  - Combining filters switches to a `search-<codes>` form, e.g. all 5 trial filters → `https://housing.com/rent/search-C2G1L4P38f9yfbk7p3m2h1fT99cUgz4`.
+  - Combining filters switches to a `search-<codes>` form, e.g. the trial's four filter codes (BHK, furnishing, lease, budget) on the base id → `https://housing.com/rent/search-C2G1L4P38f9yfbk7p3m2h1fT99cUgz4`.
   - Observed codes **[Inference]**: `C2` = 1 BHK, `G1` = Fully Furnished, `L4` = lease type Bachelor, `T99cUgz4` = budget ₹12k–22k (opaque; decode unverified).
 - **Recommended approach:** don't hand-build the token. Apply filters once in the UI, copy the resulting URL, reuse *that* for the run. Treat it as opaque-but-stable-within-a-run.
 

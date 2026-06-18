@@ -11,7 +11,7 @@ The set of filters for a run, applied identically on every site. The values belo
 | Listing type | Rent | Rent vs buy — this workflow targets rent (confirm) |
 | Budget (₹/month) | 25000–45000 | Min–max monthly rent |
 | BHK | 2, 3 | One or more configurations |
-| Property type | Apartment | Apartment / independent / villa / PG |
+| Property type | Apartment | Apartment / independent / villa / PG / studio |
 | Furnishing | Semi, Full | Unfurnished / semi / fully |
 | Min area (sq.ft) | 900 | State whether carpet or built-up |
 | Tenant preference | Family | Family / bachelors / any |
