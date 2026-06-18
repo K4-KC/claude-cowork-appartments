@@ -21,5 +21,6 @@ The set of filters for a run, applied identically on every site. The values belo
 ## Notes
 
 - Each site labels these filters differently; mapping a filter to a site's UI controls is part of that site's recipe (`docs/sites/<site>.md`).
+- **NoBroker has no city-wide search** — its results list fails without a specific locality (geo-token). A run that includes NoBroker **must name one or more localities**, and NoBroker is browsed per-locality. See `docs/sites/nobroker.md`.
 - If the user gives a filter a site can't express in its UI, record the gap in the site recipe and apply that filter during the validate/calculate step here instead.
 - Record the actual filter values used for a run alongside its data (e.g. a small notes file in `data/<run-id>/`) so a run is reproducible.
