@@ -94,6 +94,8 @@ These do **not** come from the sites — Claude Code adds them after capture by 
 | Column | Type | Unit / format | Derived from |
 |---|---|---|---|
 | `calc_price_per_sqft` | number | ₹/sq.ft/month | `rent ÷ area`, on the captured `area_basis` — see `docs/calculations.md` |
+| `calc_true_monthly_cost` | number | ₹/month | `rent + extra maintenance + (brokerage+move-in)/12 + deposit×0.005` — see `docs/calculations.md` |
+| `calc_cost_basis` | string | full / lower-bound | Confidence flag for `calc_true_monthly_cost`: `lower-bound` when a cost input was absent/uncaptured (value understates true cost) |
 | `calc_*` | — | — | _Added per calculation once defined in `docs/calculations.md`._ |
 
 Rules for derived columns:

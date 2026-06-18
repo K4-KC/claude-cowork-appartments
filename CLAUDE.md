@@ -55,7 +55,8 @@ The **`/commit` skill** (`.claude/skills/commit/SKILL.md`) packages this into a 
 | `docs/trial-protocol.md` | First-contact trial method: how to discover a site's fastest capture path and what findings to record |
 | `docs/search-config.md` | The filter/search-parameter template for a run (the "set of filters") |
 | `docs/data-schema.md` | CSV columns, units, and raw-vs-clean conventions |
-| `docs/calculations.md` | The additional logic/calculations (TBD — to be decided) |
+| `docs/calculations.md` | The additional logic/calculations (`price_per_sqft` + `true_monthly_cost` defined; commute/ranking open) |
+| `docs/processing-rules.md` | Cross-site validation/normalization rules the trials surfaced (area-basis, per-site cost-field map, date/token handling) |
 | `docs/rules.md` | Operating rules and etiquette for capture + processing |
 | `docs/sites/<site>.md` | Per-site browsing/extraction recipe, refined via trial & testing |
 
@@ -63,7 +64,7 @@ The **`/commit` skill** (`.claude/skills/commit/SKILL.md`) packages this into a 
 
 These are intentionally unspecified; confirm with the user before relying on them, and update the relevant doc (not just this file) once decided so the knowledge stays modular:
 
-- **Which calculations** to run per listing (true monthly cost, ₹/sq.ft, commute score, weighted ranking, …). Placeholder in `docs/calculations.md`.
+- **Which calculations** to run per listing. **Decided:** `calc_price_per_sqft`, `calc_true_monthly_cost` (+ `calc_cost_basis` flag). **Still open:** commute/distance score and weighted ranking. See `docs/calculations.md`.
 - **Amenities representation** — keep all amenities in one semicolon-separated `amenities` column, or split into one column per amenity. Provisional: single column. Detail in `docs/data-schema.md`.
 - **Exact filter set and target city/localities** for a run. Template in `docs/search-config.md`.
 - **Per-site recipes** — to be built and validated through trial runs.
