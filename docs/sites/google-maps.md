@@ -1,12 +1,27 @@
 # Recipe: Google Maps (geo-enrichment source)
 
-> **Cowork — start here.** This is **not** a rental-listing site — it is the **geo-enrichment** source. You geocode each building once and read distance/time metrics off Maps into a per-building `geo.csv`. **Read order:** `docs/cowork-run.md` → this file → `docs/data-schema.md` (the *geo* columns) → `docs/rules.md`. A geo run is driven by a **deduped unique-building worklist** that Claude Code prepares for the run (not by a site search), so it runs **after** the listing CSVs are captured. No kickoff needed once this recipe exists — kickoffs are only for the first-contact trial (`docs/trial-protocol.md`).
+> **Cowork — start here.** This is **not** a rental-listing site — it is the **geo-enrichment / derived-run** source. You geocode each building once and read distance/time metrics off Maps into a per-building `geo.csv`. This run is triggered by **"run a derived run for `<run-id>`"** (see `docs/cowork-run.md` → *Run types*). **Read order:** the run's **`BRIEF.md`** → this file → its **`buildings-worklist.csv`** → `docs/data-schema.md` (the *geo* columns) → `docs/rules.md`. The run is driven by that **`buildings-worklist.csv`** — a deduped unique-building list (ordered high-confidence first) that Claude Code prepared (not a site search) — so it runs **after** the listing CSVs are captured. No kickoff needed once this recipe exists — kickoffs are only for the first-contact trial (`docs/trial-protocol.md`).
 
 Distilled from the first-contact trial `data/2026-06-19-trial-maps-geo-blr-1bhk/` (2026-06-19, 3 buildings, all 3 geocode tiers validated). If live Maps has drifted, record it in the run's `findings.md`.
 
 ## What this produces
 
 One row **per unique building** in `geo.csv` (schema in `docs/data-schema.md` → *Geo companion file*): a geocode (`lat`,`lng`,`geo_confidence`) plus, for that point, nearest-metro / downtown-anchor / daily-needs-POI / Instamart distances and times. Buildings are **deduped across all sites first** (a society geocoded once serves every listing in it, on every site) and **cached across runs** — a building already in the master geo store is never re-captured.
+
+---
+
+## The worklist — Cowork's input (one row per building)
+
+Process **`data/<run-id>/buildings-worklist.csv`** top to bottom (it's ordered building-level → address → locality-only, so the most reliable buildings come first). Each row's columns:
+
+| Column | Use |
+|---|---|
+| `geo_key` | The building's unique id. **Write it verbatim into the `geo_key` column of `geo.csv`** — it is also the **resume key** (skip keys already in `geo.csv`). |
+| `geocode_query_hint` | **The search string to geocode** — use it as-is in Maps (it's the prepared `building_name, locality, Bengaluru`, or the address). Prefer it over re-assembling your own query. |
+| `locator_type` | `building` / `address` / `locality` — a *hint* about the likely tier. **Do not** copy it into `geo.csv`, and **do not** treat it as the confidence: you still derive `geo_confidence` yourself from the resolved Maps place type (the gate below). |
+| `building_name`, `locality`, `address` | Provenance + fallback context for the geocode. |
+| `geocode_from_site`, `geocode_from_listing_id` | The listing this building came from → write into `geo.csv`'s `source_site` / `source_listing_id`. |
+| `n_listings`, `sites`, `done` | Bookkeeping. `done` is optional convenience; **`geo.csv` presence is the authoritative resume signal**, not `done`. |
 
 ---
 
@@ -52,7 +67,8 @@ https://www.google.com/maps/dir/<lat,lng>/<destination>/data=!4m2!4m1!3e<MODE>
 The full run is long (many buildings) and spans context compaction, so **persist each building the moment it's done — never buffer in context** (user constraint, 2026-06-19):
 
 - Capture **one building end-to-end, then immediately append its row to `geo.csv`** before starting the next. Do **not** hold several buildings' results in working memory to write in a batch — a compaction would lose them.
-- The on-disk `geo.csv` is the **source of truth and the resume point**: on resume, skip any building already present (match on `calc_geo_key` / building+locality) and continue from the worklist. This is the same dedup/cache that powers speed lever 1.
+- The on-disk `geo.csv` is the **source of truth and the resume point**. **First action of every session: read `geo.csv`, collect the set of `geo_key` values already present, and skip those worklist rows** — then continue down the worklist. Match on **`geo_key`** (the column both `geo.csv` and the worklist share) — *not* `calc_geo_key`, which is a listing-side join key that does **not** exist in either file.
+- **Before appending a row, confirm its `geo_key` is not already in `geo.csv`.** The file has no enforced uniqueness, so a missed skip would silently duplicate a building (and fan out the downstream join). This is the same dedup/cache that powers speed lever 1.
 - One row per building, written in **worklist order**, so progress is always inspectable and the run can stop/resume at any point with zero re-work. Time is acceptable *as long as this holds*.
 
 ## Destinations & their reads

@@ -14,7 +14,7 @@
 3. **Write that building's row to `geo.csv` IMMEDIATELY — one at a time, never buffered.** Carry the worklist's `geo_key` into the row. `geo.csv` already has the locked 48-column header.
 
 ## Resumability (the whole point)
-`geo.csv` is the **source of truth and resume point**. On any session: **skip every `geo_key` already present in `geo.csv`** and continue down the worklist. Stop/resume freely — zero re-work. Mark `done` in the worklist if convenient, but `geo.csv` presence is authoritative.
+`geo.csv` is the **source of truth and resume point**. On any session, **first read `geo.csv` and collect the `geo_key`s already present**, then **skip those worklist rows** (match on `geo_key`) and continue down the worklist. **Before appending, confirm the `geo_key` isn't already in `geo.csv`** (no enforced uniqueness → a missed skip duplicates a building). Stop/resume freely — zero re-work. Mark `done` in the worklist if convenient, but `geo.csv` presence is authoritative.
 
 ## Decisions baked in (2026-06-19)
 - **Car route = Maps "Best route"** (top/first-listed), uniformly.
