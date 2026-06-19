@@ -8,9 +8,11 @@ Sites stay separate (`docs/calculations.md`) — these rules make *within-site* 
 `area` is captured on whatever basis the site shows, recorded in `area_basis`:
 - Housing.com → **built-up**
 - NoBroker → **built-up**
-- 99acres → **carpet** (and sometimes **"Plot Area"** = land, not living area — not comparable; capture the living-area basis and flag)
+- 99acres → **basis varies per listing** — not a single basis. A 350-listing run (2026-06-18) was carpet 41% / super built-up 24% / built-up 20% / **plot 15%**. "Plot Area" = land, not living area (not comparable; flag it). So **segment by `area_basis` even within a single 99acres run**, not just across sites. (Earlier note said "99acres → carpet"; that was a 3-listing sample — basis is mixed.)
 
 `calc_price_per_sqft` is only comparable across rows with the **same `area_basis`**. Built-up and carpet ₹/sq.ft differ materially (carpet is smaller → higher ₹/sq.ft for the same rent). When a table mixes bases, segment by basis or flag it. Do **not** silently convert one basis to another.
+
+**Guard ₹/sq.ft rankings against poster-error areas.** Owner/dealer-entered `area` is often wrong — a 1 BHK / 1 RK listing with `area` of 1,500 / 6,000 / 13,500 sqft is a data-entry error that silently produces an absurdly *low* ₹/sq.ft and poisons any "best value" sort. When ranking by `calc_price_per_sqft`, restrict to a **plausible living-area band** (e.g. ~250–900 sqft for 1 RK/1 BHK) and exclude `area_basis = plot`; keep all rows in the CSV but don't let outliers top the ranking. Flag the implausible ones in `notes` rather than rewriting them.
 
 ## 2. Cost-field availability — per-site map (drives `calc_true_monthly_cost`)
 Absence of a cost field ≠ ₹0. What each site actually exposes:
@@ -42,6 +44,11 @@ Sites list which tenant types are permitted, variously joined:
 
 Filter/score on **membership** ("is bachelor allowed?"), never equality. A bachelor search does not imply the listing prints "Bachelor".
 
+**99acres: `tenant_preference` is detail-page-only and may be unconfirmable at scale.** It never shows on the card, so confirming it for a large set means one detail open per listing — and rapid detail opens trip a CAPTCHA (`docs/sites/99acres.md`). When a run needs a *gender* split (e.g. "both men & women / all, exclude single-gender") and full detail capture isn't feasible:
+- Lean on the **filter** first — selecting Single Women + Single Men already restricts to bachelor-eligible (men ∪ women).
+- **Screen the listing description** for single-gender wording — "ladies/girls/women/female only", "gents/men/male/boys only", or a tell in the building name ("…Ladies PG"). Flag matches `[Inference]` (a heuristic, **not** the site's tenant field) and **confirm a sample** of detail pages where possible.
+- Leave the `tenant_preference` column **blank** for un-confirmed rows (don't backfill "All" from the filter); record the gender flag in `notes`. Treat blanks as unknown, not as "All".
+
 ## 5. `posted_by` reliability varies
 - **Normalize on read** (don't rewrite the captured cell; case-insensitive) to the schema enum `owner / broker`: 99acres `Dealer` → broker, `Owner` → owner; Housing agency name → broker, `Owner` → owner.
 - Housing.com / 99acres: **printed** (owner/broker, owner/dealer) — trust it.
@@ -57,7 +64,7 @@ Map captured wording to `apartment / independent / villa / PG / studio` on read 
 99acres bundles **1 RK and 1 BHK** under one filter button, so studios appear in "1 BHK" results with `bhk=1`. If a run needs *true* 1 BHK, exclude studios in processing (flagged in `notes`/title). Housing and NoBroker keep 1 RK separate.
 
 ## 8. `deposit` expressed as a rule
-99acres sometimes gives deposit as "N months rent" rather than a number; NoBroker may note "negotiable". Where it's a multiple, convert to ₹ using `rent` and note it; where only "negotiable"/absent, leave as captured/blank — don't invent a figure.
+99acres sometimes gives deposit as "N months rent" rather than a number; NoBroker may note "negotiable". Where it's a multiple, convert to ₹ using `rent` and note it; where only "negotiable"/absent, leave as captured/blank — don't invent a figure. **Implausible captured deposits happen** (a 99acres run saw `₹1`, `₹40`, `₹2,600` against five-figure rents — clearly poster placeholders); keep them as captured and **flag in `notes`**, don't silently "fix". They drag `calc_true_monthly_cost` (the `deposit×0.005` term) toward the rent floor, which is consistent with its `lower-bound` basis on 99acres anyway.
 
 ## 9. Run-scope quirks (affect how a run is defined, not a single row)
 - **NoBroker has no city-wide search** — it requires a locality geo-token; browse per-locality (also in `docs/search-config.md`). Mind its default `radius=2.0 km`, which pulls in neighbouring localities (a "Koramangala" search surfaced a BTM Layout listing) — filter by locality if strictness matters.
@@ -79,6 +86,17 @@ Seed map from the trial round (extend as new tokens appear; only materialize fla
 | `calc_amenity_water_supply` | "Regular Water Supply" (housing), "Water Supply: Borewell/Both/Corporation" (nobroker) | NoBroker reports the *source*; presence ≠ "regular" |
 
 **Not amenities — do not map** (they ride along in some sites' lists but belong to excluded/other fields): facing direction ("North-East Facing"), location proximity ("Close to Metro/Market/Hospital/School"), property attributes ("Corner Property", "Vaastu Compliant"), flooring ("Vitrified Flooring"). Ignore these when deriving amenity flags.
+
+## 11. Google Maps geo reads (drives `geo.csv`)
+Geo data is **captured from Google Maps** into `data/<run-id>/geo.csv` (schema in `docs/data-schema.md`; capture method in `docs/sites/google-maps.md`). Rules for reading/normalizing it here:
+
+- **Unit/time normalization.** Distance is `km` ≥1 km but **metres** below (`550 m` → `0.55`). Time: `33 min`, `1 hr 8 min` → `68`, `2 hr 24 min` → `144` → store integer minutes.
+- **`*_mm_*` (transit).** `*_mm_min` = **transit time as Maps shows it — bus *or* metro, whichever is fastest, NOT pure walk+metro** (short inner hops are usually bus; metro wins only long-haul). `*_mm_km` is **permanently blank** (Maps' transit panel shows no trip distance) — don't treat blank as a capture miss.
+- **Route-selection rule.** Maps' **"Best route"** is occasionally not the shortest distance. Trial used **top/first-listed** for car, **shortest duration** for transit — *standardize before the full run* (open decision in the recipe); whichever is chosen, apply it uniformly so `calc_price`-style rankings stay comparable.
+- **Trust the resolved place, not the query.** A POI query can silently resolve to the **wrong city** (a Nelamangala MedPlus resolved near Mysore, ~150 km). Verify the resolved title/coords; flag any distance whose destination looks out-of-region.
+- **`geo_confidence` tiers.** `building` = precise; **`locality` = approximate** (centroid — don't rank walk-to-pharmacy precision on these); `none` = lat/lng and all distances blank. Segment or flag locality-tier rows when ranking on fine-grained proximity.
+- **Distance is traffic-invariant; times are not.** Trial times were 08:00-IST rush-inflated. Prefer **distance** for ranking; treat captured times as approximate (or standardize the capture hour).
+- **Dedup + cache (also a speed rule).** Geocode/capture **once per unique building** (deduped across sites) and reuse across runs via a master geo store; join back to listings on a derived **`calc_geo_key`** (normalized building+locality). A building shared by many listings/sites is one geo row, not many.
 
 ## Identity columns (reference, for any future dedup)
 `listing_id` source differs by site: Housing = Property ID in the detail URL; 99acres = the `spid`; NoBroker = the hex id in `…/{id}/detail`. All stable and deep-linkable.

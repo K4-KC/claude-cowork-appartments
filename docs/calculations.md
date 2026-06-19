@@ -42,7 +42,7 @@ The settled representation for amenities (see `docs/data-schema.md`): capture st
 ## Candidate calculations (not yet committed)
 
 From earlier brainstorming — confirm before relying on any:
-- **Commute / distance** — distance or travel time from each listing to key locations (office, metro, …), plus a derived score.
+- **Commute / distance** — **resolved (2026-06-19): captured, not calculated.** Because the user chose Cowork-browses-Maps as the source, metro/anchor/POI/Instamart distances and times are **captured from Google Maps** into a per-building `geo.csv` (see `docs/sites/google-maps.md` + the geo schema in `docs/data-schema.md`), with a 3-tier geocode gate. The only genuinely *derived* (`calc_`) pieces here are **`calc_geo_key`** (the normalized building join-key) and any future **composite proximity/connectivity score** built on the captured geo metrics.
 - **Weighted ranking score** — combine multiple factors into one score to rank/shortlist within a site.
 
 ## When a calculation is chosen

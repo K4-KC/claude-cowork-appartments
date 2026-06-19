@@ -108,6 +108,21 @@ Rules for derived columns:
 - Append them after the captured columns; never overwrite or edit a captured value to produce one.
 - If a derived value can't be computed (a required captured input is missing), leave it empty — don't guess.
 
+## Geo companion file (captured from Google Maps)
+
+Geo-enrichment is **captured from a separate source (Google Maps)** by Cowork, not computed here — so it lives in its own per-run file, **`data/<run-id>/geo.csv`**, keyed **one row per unique building** (deduped across all sites; see `docs/sites/google-maps.md`). Columns use **plain names** (they are captured, not derived) and are read off Maps via the recipe. The per-site listing tables join to this file on the building (a derived `calc_geo_key`) at table-production time, so the listing CSVs stay lean. Schema **locked from the trial** `data/2026-06-19-trial-maps-geo-blr-1bhk/` (2026-06-19).
+
+| Group | Columns | Notes |
+|---|---|---|
+| Provenance | `source_site`, `source_listing_id`, `building_name`, `locality`, `captured_at` | The listing the building was geocoded from (one representative; the building joins back to all its listings). |
+| Geocode + gate | `lat`, `lng`, `geo_confidence`, `geo_notes` | `geo_confidence` ∈ **`building` / `locality` / `none`** (recipe gate). `locality` = approximate centroid; `none` = all distances blank. |
+| Nearest metro | `metro_name`, `metro_line`, `metro_walk_km`, `metro_walk_min`, `metro_car_km`, `metro_car_min` | `metro_line` constrained to operational **Green / Purple / Yellow**. |
+| Downtown anchors ×3 | `indiranagar_*`, `mg_road_*`, `koramangala_*` — each `_car_km`, `_car_min`, `_mm_min` | `_car_*` = driving. **`_mm_min` = transit time as Maps shows it (bus *or* metro, NOT pure walk+metro).** No `_mm_km` — Maps' transit panel exposes no trip distance, so transit distance is **permanently unobtainable** and the column is **dropped** (the trial file still carries empty `*_mm_km` headers; the locked schema omits them). |
+| Daily-needs POIs ×5 | `hospital_*`, `pharmacy_*`, `gym_*`, `supermarket_*`, `grocery_*` — each `_name`, `_walk_km`, `_walk_min`, `_car_km`, `_car_min` | Nearest of each category. `supermarket`/`grocery` overlap on Maps — see recipe Open decisions. |
+| Instamart | `instamart_name`, `instamart_2w_km`, `instamart_2w_min` | Two-wheeler to nearest dark store; **blank for outer localities** (none present). |
+
+Same blank-not-guessed rule applies: a metric Maps won't give is left empty (e.g. all `*_mm_km`; Instamart in outer towns). Unit/time normalization (m↔km, "1 hr 8 min"→68) and the route-selection rule are in `docs/processing-rules.md`.
+
 ## Conventions
 
 - **Currency:** plain integers in rupees, no separators or symbols (e.g. `32000`, not `₹32,000`).
