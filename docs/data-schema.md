@@ -114,7 +114,7 @@ Geo-enrichment is **captured from a separate source (Google Maps)** by Cowork, n
 
 | Group | Columns | Notes |
 |---|---|---|
-| Provenance | `source_site`, `source_listing_id`, `building_name`, `locality`, `captured_at` | The listing the building was geocoded from (one representative; the building joins back to all its listings). |
+| Provenance / key | `geo_key`, `source_site`, `source_listing_id`, `building_name`, `locality`, `captured_at` | `geo_key` = the worklist's dedup key, and the **resume key** (skip keys already in `geo.csv`); it matches each listing's derived `calc_geo_key` for join-back. `source_*` = the representative listing the building was geocoded from. |
 | Geocode + gate | `lat`, `lng`, `geo_confidence`, `geo_notes` | `geo_confidence` ∈ **`building` / `locality` / `none`** (recipe gate). `locality` = approximate centroid; `none` = all distances blank. |
 | Nearest metro | `metro_name`, `metro_line`, `metro_walk_km`, `metro_walk_min`, `metro_car_km`, `metro_car_min` | `metro_line` constrained to operational **Green / Purple / Yellow**. |
 | Downtown anchors ×3 | `indiranagar_*`, `mg_road_*`, `koramangala_*` — each `_car_km`, `_car_min`, `_mm_min` | `_car_*` = driving. **`_mm_min` = transit time as Maps shows it (bus *or* metro, NOT pure walk+metro).** No `_mm_km` — Maps' transit panel exposes no trip distance, so transit distance is **permanently unobtainable** and the column is **dropped** (the trial file still carries empty `*_mm_km` headers; the locked schema omits them). |
