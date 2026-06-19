@@ -47,13 +47,21 @@ https://www.google.com/maps/dir/<lat,lng>/<destination>/data=!4m2!4m1!3e<MODE>
 - **Mode token `!3e<MODE>`:** `0`=drive · `2`=walk · `3`=transit · `9`=two-wheeler · (`1`=bicycle).
 - **Set the mode in the URL** — clicking a mode in the panel does **not** refresh the route list in an automated session (mode-bar highlight changes but the cards stay stale). **One load per mode you need *distance* for.** Time for the other modes comes free from the mode bar (lever 2).
 
+## Incremental persistence & resume (required)
+
+The full run is long (many buildings) and spans context compaction, so **persist each building the moment it's done — never buffer in context** (user constraint, 2026-06-19):
+
+- Capture **one building end-to-end, then immediately append its row to `geo.csv`** before starting the next. Do **not** hold several buildings' results in working memory to write in a batch — a compaction would lose them.
+- The on-disk `geo.csv` is the **source of truth and the resume point**: on resume, skip any building already present (match on `calc_geo_key` / building+locality) and continue from the worklist. This is the same dedup/cache that powers speed lever 1.
+- One row per building, written in **worklist order**, so progress is always inspectable and the run can stop/resume at any point with zero re-work. Time is acceptable *as long as this holds*.
+
 ## Destinations & their reads
 
 | Group | Columns | How |
 |---|---|---|
 | **Nearest metro** (Green/Purple/Yellow only) | `metro_name`, `metro_line`, `metro_walk_km/min`, `metro_car_km/min` | Nearest allowed-line station (cached table → Claude Code picks; else category-search `metro station`, distance-ordered). Station place page shows **"Metro services: <X> Line"** — use it to enforce the line. Load **walk** (dist+time); take car time off the mode bar (demote car distance, lever 2). |
 | **Indiranagar / MG Road / Koramangala** | `<area>_car_km/min`, `<area>_mm_min` | Route to the **cached anchor coords**. Load **drive** (dist+time); read **transit** time off the same load's mode bar. `*_mm_km` is **not obtainable** (transit panel shows no distance) → leave blank. |
-| **Daily-needs POIs**: hospital, pharmacy, gym, supermarket, grocery | `<cat>_name`, `<cat>_walk_km/min`, `<cat>_car_km/min` | Category search near the pin (relevance ≈ nearest; take first sensible). Load walk + drive. ⚠ `supermarket` and `grocery` return the **same ranked list** on Maps — see Open decisions. |
+| **Daily-needs POIs**: hospital, pharmacy, gym, supermarket | `<cat>_name`, `<cat>_walk_km/min`, `<cat>_car_km/min` | Category search near the pin (relevance ≈ nearest; take first sensible). Load walk + drive. **`supermarket` is the single daily-shopping POI** — `grocery_*` was dropped because Maps returns the same ranked list for both (decision below). |
 | **Instamart** | `instamart_name`, `instamart_2w_km/min` | Search "Swiggy Instamart" (listed as *"Grocery delivery service"*); nearest pin, **two-wheeler** mode. Dark stores **exist in the city** but are several km away and **absent in outer towns** → blank there. |
 
 ## Gotchas (also feed `docs/processing-rules.md` for read/normalize)
@@ -65,9 +73,9 @@ https://www.google.com/maps/dir/<lat,lng>/<destination>/data=!4m2!4m1!3e<MODE>
 - **Car distance can exceed walk distance** on short hops (one-ways, highway detours) — not an error.
 - **No CAPTCHA / rate-limit / login wall** across ~70+ loads at ~3 s spacing (signed-in). Keep the ~3 s spacing.
 
-## Open decisions (settle before the full run)
+## Resolved decisions (2026-06-19)
 
-1. **Route-selection rule** — Maps "Best route" vs shortest-distance (they diverge in a minority).
-2. **`supermarket` vs `grocery`** — Maps can't separate them; merge into one POI, or define `supermarket`=big-format (DMart/Reliance/More) vs `grocery`=kirana and search distinctly (costs an extra search/build).
-3. **`mm` semantics** — keep transit-as-shown (bus-or-metro time), or drop it given it doesn't isolate metro. `*_mm_km` is dropped regardless (permanently blank).
-4. **Scope** — at ~4–7 min/building, a few-hundred unique buildings ≈ 15–30 h. Confirm all-unique-buildings vs a post-filter shortlist.
+1. **Route-selection** — use Maps' **"Best route"** (top/first-listed) for car, applied uniformly. Accepted that it's occasionally not the shortest distance. (Transit: shortest duration shown.)
+2. **`supermarket` vs `grocery`** — **single `supermarket` POI**; `grocery_*` columns dropped (Maps returns the same ranked list for both, so the distinction isn't capturable).
+3. **`mm`** — **keep** `*_mm_min` (transit time as shown — bus or metro, whichever is fastest). `*_mm_km` stays dropped (permanently blank).
+4. **Scope** — **all unique buildings** (no shortlist). Time is acceptable **provided the run is incrementally persisted** (see *Incremental persistence & resume* above).
