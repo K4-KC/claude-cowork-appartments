@@ -32,8 +32,11 @@ All filters expressible (with the quirks above); only isolating *pure* 1 BHK fro
 
 ## Walking results
 
-- **Infinite scroll.** First batch = 25 cards (`page_size=25`); scrolling auto-fires `page=2,3,…` and appends more. **No "Load more"/"Next" button.** The "N results" header is a static total; "Similar properties" carousels are injected between batches (skip them).
-- **Open a listing's `-spid-` detail URL** only for the detail-only fields (below). A full run is dominated by one detail-page open per listing.
+- **Numbered pager, ~25 cards/page, windowed/virtualised.** (Updated 2026-06-18 — supersedes the earlier "infinite scroll, no Next button" note.) The SRP has a **numbered footer pager** (e.g. *"Page N of 20"*, ~25 listings/page) with page-number anchors (`<a>`; current = `<a class="Pagination__active">`) and a **"Next Page >"** link (`<a class="list_header_bold">`, shown once you reach the end of the visible 1–10 window). The list is **virtualised: only ~25 cards live in the DOM at once**, and a card's `-spid-` anchor (its `listing_id`/`url`) attaches **only after that card's photo lazy-loads**. `window.scrollBy` does **not** advance the loader — only real wheel/scroll input does.
+- **Reliable per-page capture pattern:** click the pager page → wait ~3 s → scroll the results column to the **top** → harvest the 25 now-rendered cards (anchors are present right after a fresh page render; they detach again if you scroll far). "Similar properties" carousels are injected between batches (skip them — require the card to sit inside `.tupleNew__contentWrap`).
+- **Filters survive pager navigation** within a session (the result header keeps the full filter string across pages), even though they never reach the URL — so you can walk page 1→20 without re-applying the rail. A **reload** still drops them (see "not deep-linkable").
+- **Pace it.** Sweeping all 20 pages fast trips a rate-limit (see Gotchas). Page through deliberately.
+- **Open a listing's `-spid-` detail URL** only for the detail-only fields (below) — and open them in **small, spaced batches** (rapid detail hits trip a CAPTCHA; see Gotchas). A full run is dominated by one detail-page open per listing.
 
 ## Extraction → CSV
 
@@ -56,7 +59,9 @@ Cowork captures only the **captured columns** in `docs/data-schema.md` directly 
 - **`area_basis` varies** — Carpet / Super Built-up / Built-up / **Plot Area**. "Plot Area" is not living area and can dwarf the unit (sample: Plot 1200 vs Carpet 600 sq.ft) — capture the living-area basis and flag.
 - **Poster-entered fields can be wrong** — one listing's `available_from` ("30 November 2030") contradicted its "Ready to move"; treat dates skeptically.
 - **Tenant filter re-orders on click** (UI quirk) — verify each toggle after selecting.
-- No CAPTCHA, no rate-limiting, no forced full-page login seen during the trial.
+- **Rate-limit on fast pagination** (seen 2026-06-18): paging through ~15 SRP pages quickly made the results pane return **empty skeleton placeholders** and the pager stopped rendering; a pause did not recover it in-session. Page deliberately, not in a rapid sweep.
+- **CAPTCHA on rapid detail-page hits** (seen 2026-06-18): opening several `-spid-` detail pages in quick succession redirected to `…/load/verifycaptcha?redirectionPath=…`. This is an anti-bot wall — **do not solve/bypass** (`docs/rules.md`); it blocks the detail-only fields (incl. `tenant_preference`). Mitigate by spacing detail-page opens; if it fires, stop and resume later. (Supersedes the trial's "no CAPTCHA/rate-limiting" note, which only held for a tiny session.)
+- **`tenant_preference` is detail-only & costly at scale** — it never appears on the card, so confirming it for a large result set means one detail open each (and risks the CAPTCHA). When that's infeasible, the **listing description** is the fallback signal for single-gender restrictions ("ladies/girls/women only", "gents/men only", a "…Ladies PG" building name); flag those `[Inference]` and confirm a sample. The applied filter already guarantees bachelor-eligibility.
 
 ## Findings log
 

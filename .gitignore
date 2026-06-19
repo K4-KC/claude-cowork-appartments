@@ -1,3 +1,7 @@
 # Transient scratch — generated Cowork kickoff messages and other throwaways.
 # Not committed; regenerate per run.
 tmp/
+
+# macOS Finder metadata — never track.
+.DS_Store
+**/.DS_Store
